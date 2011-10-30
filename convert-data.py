@@ -1,4 +1,5 @@
 from math import sqrt
+import sys
 
 def getInfo( S ):
     if S.count( ':' ):
@@ -14,7 +15,7 @@ def getCoord( S ):
         second = S.index( ' ', first + 1 )
         return [ float( S[ first : second ] ), float( S[ second : len( S ) - 1 ] ) ]
 
-data = open( 'uruguay.tsp', 'r' )
+data = open( sys.argv[1] , 'r' )
 info = {}
 
 d = getInfo( data.readline() )
