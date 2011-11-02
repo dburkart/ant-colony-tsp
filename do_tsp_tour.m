@@ -23,6 +23,8 @@ function [ tour , distance] = do_tsp_tour( cities )
     p = .1
     pheromones =  pheromones * initial_pheromone_level;
     
+    q_0 = .9
+    
     %TODO Generate starting posistions
 
     for n = 2:number_of_cities
@@ -42,17 +44,28 @@ function [ tour , distance] = do_tsp_tour( cities )
         
             
             %Keep generating randomly until 
-            %while size(find(visited_cities(k , :) == next_city)) > 0
-             %   next_city = floor(rand(1) * number_of_cities) + 1;
-            %end
-            neighboring_cities = 1:number_of_cities;
-                      
-            unvisited_cities = setdiff(neighboring_cities , visited_cities(k , :));
+            q = rand(1);
             
-            [next_city , weight] = probability_between_cities(current_city , cities(current_city , :) , pheromones(current_city , :) , unvisited_cities);
+            next_city = current_city;
+            
+            if q > q_0
+                while size(find(visited_cities(k , :) == next_city)) > 0
+                    next_city = floor(rand(1) * number_of_cities) + 1;
+                end
+            else
+            
+                neighboring_cities = 1:number_of_cities;
+                      
+                unvisited_cities = setdiff(neighboring_cities , visited_cities(k , :));
+            
+                [next_city , weight] = probability_between_cities(current_city , cities(current_city , :) , pheromones(current_city , :) , unvisited_cities);
         
-            visited_cities(k , n) = next_city;
-            tour_distance(k , 1) = tour_distance(k , 1) + neighboring_adjacency(next_city);       
+                
+            end
+            
+            
+                visited_cities(k , n) = next_city;
+                tour_distance(k , 1) = tour_distance(k , 1) + neighboring_adjacency(next_city);  
         end
    
    
