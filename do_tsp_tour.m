@@ -1,4 +1,4 @@
-function [ tour , distance] = do_tsp_tour( cities )
+function [ tour , distance , ant] = do_tsp_tour( cities )
 %do_tsp_tour
 %   Takes in mxm adjacency matrix of cities, returns mx1 tour and distance
 
@@ -94,6 +94,7 @@ function [ tour , distance] = do_tsp_tour( cities )
 
     tour = visited_cities(best_ant , :);
     distance = shortest_tour_distance;
+    ant = best_ant;
 
 end
 
