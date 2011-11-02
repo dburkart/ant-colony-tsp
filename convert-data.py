@@ -31,11 +31,18 @@ dimension = 0
 if ( 'DIMENSION' in info ):
     dimension = int( info[ 'DIMENSION' ] )
 
+k = open( 'coords.txt', 'w' )
+k.write( 'coords = [ ' );
+
 coords = list()
 for i in range( dimension ):
-    coords.append( getCoord( data.readline() ) )
+    c = getCoord( data.readline() )
+    coords.append( c )
+    k.write( '[' + str(c[0]) + ' ' + str(c[1]) + '] ' );
 
-f = open( 'data.txt', 'w' )
+k.write( '] ');
+
+f = open( 'adj_matrix.txt', 'w' )
 
 matrix = [ [ 0 for i in range( dimension ) ] for j in range( dimension ) ]
 for i in range( dimension ):
