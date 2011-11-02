@@ -7,16 +7,10 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
 
     pheromones = ones(size(cities));
 
-    visited_cities = zeros([number_of_ants number_of_cities]);
-
-    tour_distance = zeros([number_of_ants 1]);
 
     [nearest_neighbor_tour , nearest_neighbor_tour_distance] = do_nearest_neighbor_tour( cities )
     
     
-    
-    %Generate the ants original starting location
-    visited_cities(: , 1) = floor(rand(1 , number_of_ants) * number_of_cities) + 1;
 
     
     initial_pheromone_level = 1 / (nearest_neighbor_tour_distance * number_of_cities);
@@ -30,7 +24,14 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
     
     count = 0
 
-    while ( count < 100 )
+    while ( count < 1000 )
+        visited_cities = zeros([number_of_ants number_of_cities]);
+        
+        %Generate the ants original starting location
+        visited_cities(: , 1) = floor(rand(1 , number_of_ants) * number_of_cities) + 1;
+        
+        tour_distance = zeros([number_of_ants 1]);
+    
         for n = 2:number_of_cities
             for k = 1:number_of_ants
                 %Get the city which is stored in the previous location, ie the
@@ -100,15 +101,23 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
         distance = shortest_tour_distance;
         ant = best_ant;
 
-        for n = 2:size(tour)
+        %global updating
+
+
+        pheromones = pheromones * (1 - a);
+        
+        
+        best_pheromones = zeros(size(pheromones));
+        
+        for n = 2:size(tour, 2)
             previous_city = visited_cities(ant , n - 1);
             current_city = visited_cities(ant , n);
 
-            current_pheromone = pheromone_matrix(previous_city , current_city);
-
-            pheromone_matrix(previous_city , current_city) = (1 - a) * current_pheromone + a * power(distance, -1);
+            best_pheromones(previous_city , current_city) = a * (1/distance);
         end
-    
+        
+        pheromones = pheromones + best_pheromones;
+        
         count = count + 1
     
     end
