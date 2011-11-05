@@ -18,13 +18,14 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
     a = .1
     pheromones =  pheromones * initial_pheromone_level;
     
-    q_0 = .9
+    q_0 = 1
+    
+    random_method = 0
     
     %TODO Generate starting posistions
     
-    count = 0
 
-    while ( count < 1000 )
+    for count = 1:1000
         visited_cities = zeros([number_of_ants number_of_cities]);
         
         %Generate the ants original starting location
@@ -54,9 +55,31 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
                 next_city = current_city;
 
                 if q > q_0
-                    while size(find(visited_cities(k , :) == next_city)) > 0
-                        next_city = floor(rand(1) * number_of_cities) + 1;
+                    
+                    if random_method == 0
+                        neighboring_cities = 1:number_of_cities;
+
+                        unvisited_cities = setdiff(neighboring_cities , visited_cities(k , :));
+
+                        [probabilites] = random_proportional_rule(current_city , cities(current_city , :) , pheromones(current_city , :) , unvisited_cities);
+                    
+                        rand_index = floor(rand(1) * 100 + 1);
+                    
+                        next_city = probabilites(rand_index);
+                    
+                        while next_city == 0
+                            rand_index = floor(rand(1) * 100 + 1);
+                    
+                            next_city = probabilites(rand_index);
+                        end
+                    else
+                        while size(find(visited_cities == next_city)) > 0
+                            next_city = round(rand(1) * number_of_cities + 1);
+                        end
+                        
                     end
+
+
                 else
 
                     neighboring_cities = 1:number_of_cities;
@@ -95,7 +118,7 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
             tour_distance(k , 1) = tour_distance(k  , 1) + cities(current_city  , visited_cities(k , 1));
         end
 
-        [shortest_tour_distance , best_ant] = min(tour_distance)
+        [shortest_tour_distance , best_ant] = min(tour_distance);
 
         tour = visited_cities(best_ant , :);
         distance = shortest_tour_distance;
@@ -117,8 +140,6 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
         end
         
         pheromones = pheromones + best_pheromones;
-        
-        count = count + 1
     
     end
 
@@ -152,6 +173,43 @@ function [ max_city , max_weight] = probability_between_cities(city_r , cities_r
         
     end 
         
+end
+
+function [probabilites] = random_proportional_rule(city_r , cities_r , pheromones_r , unvisited_cities)
+    b = .5;
+    probability_sum = 0;
+    
+    probabilites = zeros(100 , 1);
+    
+    for u = unvisited_cities
+        unvisited_distance = cities_r(u);
+        unvisited_pheromone = pheromones_r(u);
+        
+        unvisited_weight = (1 / unvisited_distance) * unvisited_pheromone ^ b;
+        
+        probability_sum = probability_sum + unvisited_weight;
+    end
+    
+    start_index = 1;
+    
+    for s = unvisited_cities
+        unvisited_distance = cities_r(s);
+        unvisited_pheromone = pheromones_r(s);
+        
+        unvisited_weight = (1 / unvisited_distance) * unvisited_pheromone ^ b;
+        
+        unvisited_probability = round((unvisited_weight / probability_sum) * 100);
+        
+        probabilites(start_index:(start_index + unvisited_probability)) = s;
+        start_index = start_index + unvisited_probability;
+    end
+    
+    
+
+
+end
+
+function [probability] = weight_function()
 end
 
 function [nn_tour , nn_tour_length] = do_nearest_neighbor_tour( cities )
