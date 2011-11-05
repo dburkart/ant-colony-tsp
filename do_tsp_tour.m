@@ -23,7 +23,7 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
     p = .1
     pheromones =  pheromones * initial_pheromone_level;
     
-    q_0 = .9
+    q_0 = 0
     
     %TODO Generate starting posistions
 
@@ -64,8 +64,8 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
             end
             
             
-                visited_cities(k , n) = next_city;
-                tour_distance(k , 1) = tour_distance(k , 1) + neighboring_adjacency(next_city);  
+            visited_cities(k , n) = next_city;
+            tour_distance(k , 1) = tour_distance(k , 1) + neighboring_adjacency(next_city);  
         end
    
    
@@ -77,7 +77,8 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
         
             current_pheromone = pheromones(previous_city , current_city);
         
-            pheromones(previous_city , current_city) = (1 - p) * current_pheromone + p * initial_pheromone_level;
+            %pheromones(previous_city , current_city) = (1 - p) * current_pheromone + p * initial_pheromone_level
+            pheromones(previous_city , current_city) = (1 - p) * current_pheromone;
         end
         
     end
@@ -90,7 +91,7 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
         tour_distance(k , 1) = tour_distance(k  , 1) + cities(current_city  , visited_cities(k , 1));
     end
               
-    [shortest_tour_distance , best_ant] = min(tour_distance)
+    [shortest_tour_distance , best_ant] = min(tour_distance);
 
     tour = visited_cities(best_ant , :);
     distance = shortest_tour_distance;
