@@ -7,12 +7,8 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
 
     pheromones = ones(size(cities));
 
-
     [nearest_neighbor_tour , nearest_neighbor_tour_distance] = do_nearest_neighbor_tour( cities )
-    
-    
-
-    
+       
     initial_pheromone_level = 1 / (nearest_neighbor_tour_distance * number_of_cities);
     p = .1
     a = .1
@@ -21,8 +17,6 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
     q_0 = 1
     
     random_method = 0
-    
-    %TODO Generate starting posistions
     
 
     for count = 1:1000
@@ -35,21 +29,14 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
     
         for n = 2:number_of_cities
             for k = 1:number_of_ants
+                
                 %Get the city which is stored in the previous location, ie the
                 %city we are in now
                 current_city = visited_cities(k , n - 1);
 
-
-
+                %All of our neighboring cities distances
                 neighboring_adjacency = cities(current_city , :);
 
-
-                %Need to calculate our next city here
-                %TODO replace random search with actual search
-                %next_city = current_city;
-
-
-                %Keep generating randomly until 
                 q = rand(1);
 
                 next_city = current_city;
@@ -57,16 +44,26 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
                 if q > q_0
                     
                     if random_method == 0
+                        
+                        %Index of neighboring cities
                         neighboring_cities = 1:number_of_cities;
 
+                        %Indeces of cities we haven't visited yet
                         unvisited_cities = setdiff(neighboring_cities , visited_cities(k , :));
 
+                        %Probablities is a weighted vector of cities we
+                        %should choose. A city which we should visit based
+                        %on rules will more entries in the vector. A city
+                        %with a .7 chance of being picked will have 70
+                        %entries
                         [probabilites] = random_proportional_rule(current_city , cities(current_city , :) , pheromones(current_city , :) , unvisited_cities);
                     
+                        %Pick our randome index into the weighted vector
                         rand_index = floor(rand(1) * 100 + 1);
                     
                         next_city = probabilites(rand_index);
                     
+                        %Due to rounding issues, it is possible for vector to not have 100 actual zentries 
                         while next_city == 0
                             rand_index = floor(rand(1) * 100 + 1);
                     
@@ -81,7 +78,8 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
 
 
                 else
-
+                    %In this case, rather than randomly choosing between
+                    %all cities, we just pick the best one
                     neighboring_cities = 1:number_of_cities;
 
                     unvisited_cities = setdiff(neighboring_cities , visited_cities(k , :));
@@ -91,7 +89,7 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
 
                 end
 
-
+                    %Update our visited cities and tour distance
                     visited_cities(k , n) = next_city;
                     tour_distance(k , 1) = tour_distance(k , 1) + neighboring_adjacency(next_city);  
             end
@@ -124,12 +122,13 @@ function [ tour , distance , ant] = do_tsp_tour( cities )
         distance = shortest_tour_distance;
         ant = best_ant;
 
-        %global updating
-
-
+        %Global updating
+        
+        %Decrease all pheremones
         pheromones = pheromones * (1 - a);
         
         
+        %Increase pheremones on best ant tour
         best_pheromones = zeros(size(pheromones));
         
         for n = 2:size(tour, 2)
@@ -148,13 +147,6 @@ end
 function [ max_city , max_weight] = probability_between_cities(city_r , cities_r , pheromones_r , unvisited_cities )
     b = .5;
 
-    %distance = cities(city_r , city_s);
-    %pheremone = pheremones(city_r , city_s);
-    
-    %city_weight = distance * pheremone ^ b;
-    
-    %unvisited_sum = 0
-    
     max_weight = 0;
     
     max_city = unvisited_cities(1);
@@ -181,6 +173,7 @@ function [probabilites] = random_proportional_rule(city_r , cities_r , pheromone
     
     probabilites = zeros(100 , 1);
     
+    %Create the sum of each probability of visiting the nodes
     for u = unvisited_cities
         unvisited_distance = cities_r(u);
         unvisited_pheromone = pheromones_r(u);
@@ -192,6 +185,7 @@ function [probabilites] = random_proportional_rule(city_r , cities_r , pheromone
     
     start_index = 1;
     
+    %Create the weighted vector
     for s = unvisited_cities
         unvisited_distance = cities_r(s);
         unvisited_pheromone = pheromones_r(s);
@@ -204,12 +198,6 @@ function [probabilites] = random_proportional_rule(city_r , cities_r , pheromone
         start_index = start_index + unvisited_probability;
     end
     
-    
-
-
-end
-
-function [probability] = weight_function()
 end
 
 function [nn_tour , nn_tour_length] = do_nearest_neighbor_tour( cities )
